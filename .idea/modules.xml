@@ -3,7 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/defect-party.iml" filepath="$PROJECT_DIR$/defect-party.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../java_examples_utils/app/java_examples_utils.iml" filepath="$PROJECT_DIR$/../java_examples_utils/app/java_examples_utils.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java_floor_plan_example.iml" filepath="$PROJECT_DIR$/java_floor_plan_example.iml" />
     </modules>
   </component>
 </project>
