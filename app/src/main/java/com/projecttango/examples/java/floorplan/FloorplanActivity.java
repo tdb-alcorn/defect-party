@@ -102,6 +102,9 @@ public class FloorplanActivity extends Activity implements View.OnTouchListener 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Intent I = new Intent(this, LoginActivity.class);
+        startActivity(I);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 

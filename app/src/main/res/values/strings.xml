@@ -7,4 +7,15 @@
     <string name="failed_measurement">Failed to fit plane</string>
     <string name="failed_permissions">Permissions required!</string>
 
+    <string name="loginButtonText">Log in with OpenID Connect</string>
+    <string name="editConfButton">OpenId Connect Client Configuration</string>
+    <string name="requestButton">Request protected Ressource</string>
+    <string name="logoutButtonText">Logout (Removes account)</string>
+
+    <!-- TokensExpiredDialog -->
+    <string name="tokensExpiredDialogTitle">Tokens have expire</string>
+    <string name="tokensExpiredDialogMsg">You need to signin again to continue</string>
+    <string name="tokensExpiredDialogButton">SignIn</string>
+
+
 </resources>

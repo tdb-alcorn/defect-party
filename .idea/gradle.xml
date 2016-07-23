@@ -8,6 +8,7 @@
         <option name="gradleJvm" value="1.8" />
         <option name="modules">
           <set>
+            <option value="$PROJECT_DIR$/../../OIDCAndroidLib/oidclib" />
             <option value="$PROJECT_DIR$/../java_examples_utils/app" />
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />

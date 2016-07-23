@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../../OIDCAndroidLib/oidclib/OIDCAndroidLib.iml" filepath="$PROJECT_DIR$/../../OIDCAndroidLib/oidclib/OIDCAndroidLib.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/../java_examples_utils/app/java_examples_utils.iml" filepath="$PROJECT_DIR$/../java_examples_utils/app/java_examples_utils.iml" />
       <module fileurl="file://$PROJECT_DIR$/java_floor_plan_example.iml" filepath="$PROJECT_DIR$/java_floor_plan_example.iml" />
