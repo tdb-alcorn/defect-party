@@ -27,14 +27,20 @@ import com.google.atap.tangoservice.TangoOutOfDateException;
 import com.google.atap.tangoservice.TangoPoseData;
 import com.google.atap.tangoservice.TangoXyzIjData;
 
+import android.accounts.Account;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.opengl.Matrix;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -488,26 +494,36 @@ public class FloorplanActivity extends Activity implements View.OnTouchListener 
      * Executed as an AsyncTask because saving the adf could be an expensive operation.
      */
     public void finishPlan(View view) {
+        Log.i(TAG, "sending defects to flux");
+        DefectParty app = DefectParty.getApp();
+        Resources res = getResources();
+        String projectId = res.getString(R.string.projectId);
+        String cellId = res.getString(R.string.cellId);
         // Don't attempt to save if the service is not ready.
-        if (!canSaveAdf()) {
-            Toast.makeText(this, "Tango service not ready to save ADF", Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        // Only finish the plan if we have enough measurements.
-        if (mWallMeasurementList.size() < 3) {
-            Toast.makeText(this, "At least 3 measurements are needed to close the room",
-                    Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        if (mFinishPlanTask != null) {
-            Log.w(TAG, "Finish task already executing");
-            return;
-        }
-
-        mFinishPlanTask = new FinishPlanTask();
-        mFinishPlanTask.execute();
+        Log.i(TAG, "sending this number of points to flux");
+        Log.i(TAG, Integer.toString(mWallMeasurementList.size()));
+        String measurements = PlanBuilder.toString(mWallMeasurementList);
+        Account account = app.availableAccounts[app.selectedAccountIndex];
+        new APIUtility.ToFluxTask(this, app.accountManager, account, projectId, cellId).execute(measurements);
+//        if (!canSaveAdf()) {
+//            Toast.makeText(this, "Tango service not ready to save ADF", Toast.LENGTH_LONG).show();
+//            return;
+//        }
+//
+//        // Only finish the plan if we have enough measurements.
+//        if (mWallMeasurementList.size() < 3) {
+//            Toast.makeText(this, "At least 3 measurements are needed to close the room",
+//                    Toast.LENGTH_LONG).show();
+//            return;
+//        }
+//
+//        if (mFinishPlanTask != null) {
+//            Log.w(TAG, "Finish task already executing");
+//            return;
+//        }
+//
+//        mFinishPlanTask = new FinishPlanTask();
+//        mFinishPlanTask.execute();
     }
 
     /**

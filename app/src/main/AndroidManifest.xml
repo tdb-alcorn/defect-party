@@ -19,6 +19,7 @@
         android:required="true" />
 
     <application
+        android:name="DefectParty"
         tools:replace="android:theme"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"

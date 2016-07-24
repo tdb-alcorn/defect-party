@@ -19,6 +19,7 @@ import org.json.JSONArray;
 import org.rajawali3d.math.vector.Vector3;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -34,13 +35,13 @@ public class PlanBuilder {
      * @return String
      */
     public static String toString(List<WallMeasurement> wallMeasurementList) {
-        List<float[]> planPoints = new ArrayList<float[]>();
+        List<String> planPoints = new ArrayList<String>();
         if (!wallMeasurementList.isEmpty()) {
             for (WallMeasurement wallMeasurement : wallMeasurementList) {
                 float[] openGlWall = wallMeasurement.getPlaneTransform();
                 float[] measurementPoint = new float[]{openGlWall[12], openGlWall[13],
                         openGlWall[14]};
-                planPoints.add(measurementPoint);
+                planPoints.add(Arrays.toString(measurementPoint));
             }
         }
         return planPoints.toString();

@@ -8,6 +8,7 @@ import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Application;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -40,6 +41,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Initiates the login procedures and contains all UI stuff related to the main activity.
@@ -63,10 +65,12 @@ public class LoginActivity extends AppCompatActivity {
     private Button logoutButton;
 
     private ProgressBar progressBar;
-    private OIDCAccountManager accountManager;
-    private Account availableAccounts[];
+    public OIDCAccountManager accountManager;
+    public Account availableAccounts[];
 
-    private int selectedAccountIndex;
+    public int selectedAccountIndex;
+
+//    public static LoginActivity instance;
 
     //region Activity Lifecycle
 
@@ -84,6 +88,7 @@ public class LoginActivity extends AppCompatActivity {
         progressBar.setVisibility(View.INVISIBLE);
 
         accountManager = new OIDCAccountManager(this);
+//        instance = this;
     }
 
     @Override
@@ -109,7 +114,6 @@ public class LoginActivity extends AppCompatActivity {
                 new LoginTask().execute(availableAccounts[selectedAccountIndex]);
             }
         }
-        new ListProjectsTask(this).execute();
     }
 
     //endregion
@@ -119,6 +123,12 @@ public class LoginActivity extends AppCompatActivity {
     protected void refreshAvailableAccounts() {
         // Grab all our accounts
         availableAccounts = accountManager.getAccounts();
+        DefectParty app = DefectParty.getApp();
+        app.availableAccounts = availableAccounts;
+        app.accountManager = accountManager;
+        app.selectedAccountIndex = selectedAccountIndex;
+
+//        new ListProjectsTask(this).execute();
     }
 
     //endregion
@@ -156,8 +166,16 @@ public class LoginActivity extends AppCompatActivity {
             case 1:
                 // if we have an user endpoint we try to get userinfo with the receive token
                 if (!TextUtils.isEmpty(userInfoEndpoint)) {
-                    new LoginTask().execute(availableAccounts[0]);
+                    refreshAvailableAccounts();
+                    AsyncTask lt = new LoginTask().execute(availableAccounts[0]);
+//                    try {
+//                        lt.get();
+//
+//                    } catch (InterruptedException|ExecutionException e) {
+//                        Log.e(TAG, e.toString());
+//                    }
                 }
+
                 break;
 
             // Multiple accounts, let the user pick one

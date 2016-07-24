@@ -3,4 +3,7 @@
     <string name="projects">https://flux.io/api/projects</string>
     <string name="cells">https://flux.io/p/%1$s/api/datatable/v1/cells</string>
     <string name="cell">https://flux.io/p/%1$s/api/datatable/v1/cells/%2$s</string>
+
+    <string name="projectId">apDNLGoK7eoYbz7J1</string>
+    <string name="cellId">40a14cfa26b06c35a49f54911e8c2df7</string>
 </resources>
