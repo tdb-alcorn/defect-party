@@ -8,6 +8,7 @@ import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -18,17 +19,27 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+import android.widget.Spinner;
 
+import com.google.api.client.json.Json;
+import com.google.api.client.json.JsonString;
+import com.google.gson.internal.bind.ArrayTypeAdapter;
 import com.lnikkila.oidc.OIDCAccountManager;
 import com.lnikkila.oidc.authenticator.OIDCClientConfigurationActivity;
 import com.lnikkila.oidc.security.UserNotAuthenticatedWrapperException;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.List;
 
 /**
  * Initiates the login procedures and contains all UI stuff related to the main activity.
@@ -98,6 +109,7 @@ public class LoginActivity extends AppCompatActivity {
                 new LoginTask().execute(availableAccounts[selectedAccountIndex]);
             }
         }
+        new ListProjectsTask(this).execute();
     }
 
     //endregion
@@ -192,13 +204,13 @@ public class LoginActivity extends AppCompatActivity {
 
     public void getCells(View view, String projectId) {
         Resources res = getResources();
-        String url = String.format(res.getString(R.string.projects), projectId);
+        String url = String.format(res.getString(R.string.cells), projectId);
         new ProtectedResTask().execute(url);
     }
 
     public void getCell(View view, String projectId, String cellId) {
         Resources res = getResources();
-        String url = String.format(res.getString(R.string.projects), projectId, cellId);
+        String url = String.format(res.getString(R.string.cell), projectId, cellId);
         new ProtectedResTask().execute(url);
     }
 
@@ -261,7 +273,8 @@ public class LoginActivity extends AppCompatActivity {
             if (result == null) {
                 loginButton.setText("Couldn't get user info");
             } else {
-                loginButton.setText("Logged in as " + result.get("given_name"));
+//                loginButton.setText("Logged in as " + result.get("given_name"));
+                loginButton.setText("Logged in as foo bar");
                 Log.i(TAG, "We manage to login user to server");
             }
         }
@@ -300,7 +313,77 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private class ProtectedResTask extends AsyncTask<String, Void, Map> {
+    private class ListProjectsTask extends AsyncTask<Void, Void, List<JSONObject>> {
+
+        private Spinner dropdown;
+        private Context mContext;
+
+        public ListProjectsTask(Context context) {
+            mContext = context;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            Log.i(TAG, "list projects pre execute");
+            // set up spinner
+            dropdown = (Spinner) findViewById(R.id.projects_spinner);
+        }
+
+        @Override
+        protected List<JSONObject> doInBackground(Void... args) {
+            Log.i(TAG, "list projects running");
+            Account account = availableAccounts[selectedAccountIndex];
+            Resources res = getResources();
+            String resourceUrl = String.format(res.getString(R.string.projects));
+            try {
+                return APIUtility.getJsonList(accountManager, resourceUrl, account, null);
+            } catch (AuthenticatorException | OperationCanceledException | IOException e) {
+                e.printStackTrace();
+            } catch (UserNotAuthenticatedWrapperException e) {
+                //FIXME: we gotta handle this somehow
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(List<JSONObject> result) {
+            // Create an ArrayAdapter using the string array and a default spinner layout
+            Log.i(TAG, "listing projects");
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(mContext,
+                    R.array.blank_menu, android.R.layout.simple_spinner_item);
+            try {
+                for (int i = 0, len = result.size(); i < len; i++) {
+                    String projectName = result.get(i).getString("name");
+                    Log.i(TAG, projectName);
+                    adapter.add(result.get(i).getString("name"));
+                }
+            } catch (JSONException e) {
+                Log.e(TAG, e.toString());
+            }
+
+            // Specify the layout to use when the list of choices appears
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            // Apply the adapter to the spinner
+            dropdown.setAdapter(adapter);
+
+            dropdown.setVisibility(View.VISIBLE);
+            //Set listener Called when the item is selected in spinner
+            dropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                public void onItemSelected(AdapterView<?> parent, View view,
+                                           int position, long arg3) {
+                    String project = "You chose " + parent.getItemAtPosition(position).toString();
+                    Toast.makeText(parent.getContext(), project, Toast.LENGTH_LONG).show();
+
+                }
+
+                public void onNothingSelected(AdapterView<?> arg0) {
+                    // TODO Auto-generated method stub
+                }
+            });
+        }
+    }
+
+    private class ProtectedResTask extends AsyncTask<String, Void, List> {
 
         @Override
         protected void onPreExecute() {
@@ -312,12 +395,12 @@ public class LoginActivity extends AppCompatActivity {
          * Makes the API request to an SP.
          */
         @Override
-        protected Map doInBackground(String... args) {
+        protected List doInBackground(String... args) {
             String resourceUrl = args[0];
             Account account = availableAccounts[selectedAccountIndex];
 
             try {
-                return APIUtility.getJson(accountManager, resourceUrl, account, null);
+                return APIUtility.getJsonList(accountManager, resourceUrl, account, null);
             } catch (AuthenticatorException | OperationCanceledException | IOException e) {
                 e.printStackTrace();
             } catch (UserNotAuthenticatedWrapperException e) {
@@ -330,7 +413,7 @@ public class LoginActivity extends AppCompatActivity {
          * Processes the API's response.
          */
         @Override
-        protected void onPostExecute(Map result) {
+        protected void onPostExecute(List result) {
             progressBar.setVisibility(View.INVISIBLE);
 
             if (result == null) {

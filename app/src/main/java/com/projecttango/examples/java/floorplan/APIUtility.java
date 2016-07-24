@@ -5,14 +5,18 @@ import android.accounts.AccountManagerCallback;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.github.kevinsawicki.http.HttpRequest;
 import com.google.gson.Gson;
 import com.lnikkila.oidc.OIDCAccountManager;
 import com.lnikkila.oidc.security.UserNotAuthenticatedWrapperException;
 
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.util.Map;
+import java.util.List;
 
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_FORBIDDEN;
@@ -34,7 +38,17 @@ public class APIUtility {
             throws IOException, UserNotAuthenticatedWrapperException, AuthenticatorException, OperationCanceledException {
 
         String jsonString = makeRequest(accountManager, HttpRequest.METHOD_GET, url, account, callback);
+        Log.i("APIUtility", jsonString);
         return new Gson().fromJson(jsonString, Map.class);
+    }
+
+    public static List<JSONObject> getJsonList(OIDCAccountManager accountManager, String url, Account account,
+                                   AccountManagerCallback<Bundle> callback)
+            throws IOException, UserNotAuthenticatedWrapperException, AuthenticatorException, OperationCanceledException {
+
+        String jsonString = makeRequest(accountManager, HttpRequest.METHOD_GET, url, account, callback);
+        Log.i("APIUtility", jsonString);
+        return new Gson().fromJson(jsonString, List.class);
     }
 
     /**
@@ -56,10 +70,11 @@ public class APIUtility {
 
 
         String accessToken = accountManager.getAccessToken(account, callback);
+        String cookies = accountManager.getCookies(account, callback);
 
         // Prepare an API request using the accessToken
         HttpRequest request = new HttpRequest(url, method);
-        request = prepareApiRequest(request, accessToken);
+        request = prepareApiRequest(request, accessToken, cookies);
 
         if (request.ok()) {
             return request.body();
@@ -92,9 +107,11 @@ public class APIUtility {
      * external library to make my life easier, but you can modify this to use whatever in case you
      * don't like the (small) dependency.
      */
-    public static HttpRequest prepareApiRequest(HttpRequest request, String idToken)
+    public static HttpRequest prepareApiRequest(HttpRequest request, String idToken, String cookies)
             throws IOException {
 
-        return request.authorization("Bearer " + idToken).acceptJson();
+        request = request.authorization("Bearer " + idToken).acceptJson();
+        request = request.header("Cookie", cookies);
+        return request;
     }
 }
